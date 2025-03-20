@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ИИ-Помощник</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --background-color: #1a1a1a;
+            --text-color: white;
+            --container-bg: #2a2a2a;
+            --textarea-bg: #333;
+            --textarea-text: white;
+            --button-bg: #007bff;
+            --button-hover-bg: #0056b3;
+            --response-bg: #333;
+            --transition-speed: 0.3s;
+        }
+
+        [data-theme="light"] {
+            --background-color: #f4f4f4;
+            --text-color: #333;
+            --container-bg: white;
+            --textarea-bg: #e0e0e0;
+            --textarea-text: #333;
+            --button-bg: #28a745;
+            --button-hover-bg: #218838;
+            --response-bg: #e0e0e0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start; /* Изменено для прокрутки */
+            height: 100vh;
+            margin: 0;
+            transition: background-color var(--transition-speed) ease, color var(--transition-speed) ease;
+        }
+
+        .container {
+            background: var(--container-bg);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            width: 80%;
+            max-width: 600px;
+            margin: 20px 0; /* Отступы сверху и снизу */
+            transition: background-color var(--transition-speed) ease;
+        }
+
+        textarea {
+            width: 100%;
+            height: 100px;
+            /*padding: 10px;*/
+            border-radius: 5px;
+            border: none;
+            resize: none;
+            font-size: 16px;
+            background: var(--textarea-bg);
+            color: var(--textarea-text);
+            transition: background-color var(--transition-speed) ease, color var(--transition-speed) ease;
+        }
+
+        button {
+            background: var(--button-bg);
+            color: white;
+            border: none;
+            padding: 10px;
+            margin: 10px 0;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+            width: 100%;
+            transition: background-color var(--transition-speed) ease;
+        }
+
+        button:hover {
+            background: var(--button-hover-bg);
+        }
+
+        .response {
+            background: var(--response-bg);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 18px;
+            min-height: 50px;
+            transition: background-color var(--transition-speed) ease;
+        }
+
+        #theme-toggle {
+            position: fixed; /* Фиксированная позиция */
+            top: 20px;
+            right: 20px;
+            padding: 10px;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .home-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--button-bg);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+            text-decoration: none;
+            transition: background-color var(--transition-speed) ease;
+            margin: 20px 0;
+        }
+
+        .home-button:hover {
+            background: var(--button-hover-bg);
+        }
+
+        .home-button i {
+            margin-right: 10px;
+        }
+
+        /* Стили для инструкции */
+        .instructions {
+            margin-top: 20px;
+            text-align: left;
+            font-size: 14px;
+            color: var(--text-color);
+            background: var(--container-bg);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .instructions h3 {
+            margin-top: 0;
+            font-size: 16px;
+        }
+
+        .instructions ul {
+            padding-left: 20px;
+            margin: 10px 0;
+        }
+
+        .instructions ul li {
+            margin-bottom: 8px;
+        }
+
+        .instructions code {
+            background: var(--textarea-bg);
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+
+        .instructions a {
+            color: var(--button-bg);
+            text-decoration: none;
+        }
+
+        .instructions a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <a href="main.html" class="home-button">
+        <i class="fas fa-home"></i> На главную
+    </a>
+    <div class="container">
+        <h1>Помощник</h1>
+        <p>Задайте математический вопрос, и помощник постарается ответить!</p>
+        <textarea id="question" placeholder="Введите ваш вопрос..."></textarea>
+        <button onclick="askAI()">Спросить</button>
+        <div class="response" id="response">Ответ появится здесь...</div>
+
+        <!-- Инструкция по Math.js -->
+        <div class="instructions">
+            <h3>Основные команды Math.js:</h3>
+            <ul>
+                <li><strong>Арифметика:</strong>
+                    <ul>
+                        <li>Сложение: <code>2 + 3</code></li>
+                        <li>Вычитание: <code>5 - 2</code></li>
+                        <li>Умножение: <code>3 * 4</code></li>
+                        <li>Деление: <code>10 / 2</code></li>
+                        <li>Возведение в степень: <code>2^3</code> или <code>pow(2, 3)</code></li>
+                    </ul>
+                </li>
+                <li><strong>Функции:</strong>
+                    <ul>
+                        <li>Квадратный корень: <code>sqrt(16)</code></li>
+                        <li>Модуль числа: <code>abs(-5)</code></li>
+                        <li>Округление: <code>round(3.7)</code>, <code>floor(3.7)</code>, <code>ceil(3.2)</code></li>
+                        <li>Логарифм: <code>log(100, 10)</code> (логарифм 100 по основанию 10)</li>
+                        <li>Экспонента: <code>exp(2)</code> (e^2)</li>
+                    </ul>
+                </li>
+                <li><strong>Тригонометрия:</strong>
+                    <ul>
+                        <li>Синус: <code>sin(pi/2)</code></li>
+                        <li>Косинус: <code>cos(0)</code></li>
+                        <li>Тангенс: <code>tan(pi/4)</code></li>
+                        <li>Обратные функции: <code>asin(1)</code>, <code>acos(0)</code>, <code>atan(1)</code></li>
+                    </ul>
+                </li>
+                <li><strong>Комплексные числа:</strong>
+                    <ul>
+                        <li>Запись: <code>2 + 3i</code></li>
+                        <li>Модуль: <code>abs(2 + 3i)</code></li>
+                        <li>Аргумент: <code>arg(2 + 3i)</code></li>
+                    </ul>
+                </li>
+                <li><strong>Матрицы:</strong>
+                    <ul>
+                        <li>Создание: <code>[1, 2; 3, 4]</code></li>
+                        <li>Определитель: <code>det([1, 2; 3, 4])</code></li>
+                        <li>Умножение: <code>[1, 2] * [3; 4]</code></li>
+                    </ul>
+                </li>
+                <li><strong>Единицы измерения:</strong>
+                    <ul>
+                        <li>Конвертация: <code>2 inch to cm</code></li>
+                        <li>Вычисления: <code>5 kg * 10 m/s^2</code></li>
+                    </ul>
+                </li>
+                <li><strong>Символьные вычисления:</strong>
+                    <ul>
+                        <li>Упрощение: <code>simplify("x + x + y")</code></li>
+                        <li>Решение уравнений: <code>solve("x^2 - 4 = 0", "x")</code></li>
+                    </ul>
+                </li>
+                <li><strong>Константы:</strong>
+                    <ul>
+                        <li>Число π: <code>pi</code></li>
+                        <li>Число e: <code>e</code></li>
+                        <li>Бесконечность: <code>inf</code></li>
+                    </ul>
+                </li>
+            </ul>
+            <p>Подробнее: <a href="https://mathjs.org/docs/index.html" target="_blank">Документация Math.js</a></p>
+        </div>
+    </div>
+
+    <!-- Кнопка переключения темы -->
+    <button id="theme-toggle">
+        <i class="fas fa-moon"></i>
+    </button>
+
+    <script>
+        // Функция для переключения темы
+        function toggleTheme() {
+            const body = document.body;
+            const themeToggleIcon = document.querySelector("#theme-toggle i");
+            const currentTheme = body.getAttribute("data-theme");
+
+            if (currentTheme === "light") {
+                body.setAttribute("data-theme", "dark");
+                localStorage.setItem("theme", "dark");
+                themeToggleIcon.classList.remove("fa-sun");
+                themeToggleIcon.classList.add("fa-moon");
+            } else {
+                body.setAttribute("data-theme", "light");
+                localStorage.setItem("theme", "light");
+                themeToggleIcon.classList.remove("fa-moon");
+                themeToggleIcon.classList.add("fa-sun");
+            }
+        }
+
+        // Загрузка сохраненной темы при загрузке страницы
+        function loadTheme() {
+            const savedTheme = localStorage.getItem("theme");
+            const systemTheme = window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+            const theme = savedTheme || systemTheme;
+            document.body.setAttribute("data-theme", theme);
+
+            // Устанавливаем иконку в зависимости от темы
+            const themeToggleIcon = document.querySelector("#theme-toggle i");
+            if (theme === "light") {
+                themeToggleIcon.classList.remove("fa-moon");
+                themeToggleIcon.classList.add("fa-sun");
+            } else {
+                themeToggleIcon.classList.remove("fa-sun");
+                themeToggleIcon.classList.add("fa-moon");
+            }
+        }
+
+        // Назначаем обработчик события для кнопки переключения темы
+        document.getElementById("theme-toggle").addEventListener("click", toggleTheme);
+
+        // Загружаем тему при загрузке страницы
+        window.addEventListener("load", loadTheme);
+
+        // Функция для отправки вопроса ИИ
+        function askAI() {
+            const question = document.getElementById("question").value;
+            if (!question.trim()) {
+                alert("Введите математический вопрос!");
+                return;
+            }
+            document.getElementById("response").textContent = "Генерируем ответ...";
+
+            fetch("http://localhost:5000/api/ai/ask", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ question }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("response").textContent = data.answer;
+            })
+            .catch(() => {
+                document.getElementById("response").textContent = "Ошибка получения ответа.";
+            });
+        }
+    </script>
+</body>
+</html>

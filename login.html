@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartMathTraining</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://welcome-racer-38.clerk.accounts.dev"></script>
+    <style>
+        :root {
+            --background-color: #1a1a1a;
+            --text-color: white;
+            --container-bg: #2a2a2a;
+            --fact-box-bg: #333;
+            --button-bg: #007bff;
+            --button-hover-bg: #0056b3;
+            --transition-speed: 0.3s;
+        }
+
+        [data-theme="light"] {
+            --background-color: #f4f4f4;
+            --text-color: #333;
+            --container-bg: white;
+            --fact-box-bg: #e0e0e0;
+            --button-bg: #28a745;
+            --button-hover-bg: #218838;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            transition: background-color var(--transition-speed) ease, color var(--transition-speed) ease;
+        }
+
+        .container {
+            background: var(--container-bg);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            transition: background-color var(--transition-speed) ease;
+        }
+
+        .fact-box {
+            background: var(--fact-box-bg);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            transition: background-color var(--transition-speed) ease;
+        }
+
+        button {
+            background: var(--button-bg);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: background-color var(--transition-speed) ease;
+        }
+
+        button:hover {
+            background: var(--button-hover-bg);
+        }
+
+        #theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .home-button {
+            display: inline-flex; /* Используем inline-flex для выравнивания иконки и текста */
+            align-items: center; /* Выравниваем элементы по вертикали */
+            justify-content: center; /* Выравниваем содержимое по горизонтали */
+            background: var(--button-bg);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin-bottom: 20px; /* Добавим отступ снизу, чтобы отделить от контейнера */
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+            text-decoration: none; /* Убираем подчеркивание ссылки */
+            transition: background-color var(--transition-speed) ease;
+        }
+
+        .home-button:hover {
+            background: var(--button-hover-bg);
+        }
+
+        .home-button i {
+            margin-right: 10px; /* Отступ между иконкой и текстом */
+        }
+    </style>
+</head>
+<body>
+    <a href="main.html" class="home-button">
+        <i class="fas fa-home"></i> На главную
+    </a>
+    <div class="container">
+        <h1>SmartMathTraining</h1>
+        <!-- Заменяем кнопку "Войти / Регистрация" на компоненты Clerk -->
+        <div id="auth-container">
+            <clerk-sign-in after-sign-in-url="/"></clerk-sign-in>
+            <clerk-sign-up after-sign-up-url="/"></clerk-sign-up>
+        </div>
+
+        <clerk-user-button></clerk-user-button> <!-- Кнопка профиля пользователя -->
+
+        <div id="protected-content" style="margin-top: 20px; display: none;">
+            <h3>Контент для авторизованных пользователей</h3>
+            <p>Добро пожаловать, <span id="user-name"></span>!</p>
+            <button id="check-protected-route">Проверить защищенный роут</button>
+            <div id="protected-route-message"></div>
+        </div>
+
+        <div id="unprotected-content" style="margin-top: 20px;">
+            <h3>Контент для всех пользователей</h3>
+            <p>Вы не авторизованы.</p>
+        </div>
+
+    </div>
+
+    <!-- Кнопка переключения темы -->
+    <button id="theme-toggle">
+        <i class="fas fa-moon"></i> <!-- Иконка луны по умолчанию -->
+    </button>
+
+    <script>
+        // Функция для переключения темы (оставь как есть)
+        function toggleTheme() { /* ... */ }
+        function loadTheme() { /* ... */ }
+        document.getElementById("theme-toggle").addEventListener("click", toggleTheme);
+        window.addEventListener("load", loadTheme);
+
+        // Загрузка случайного факта (оставь как есть)
+        document.addEventListener("DOMContentLoaded", function() {
+
+
+        window.Clerk.load({
+            publishablekey: 'pk_test_d2VsY29tZS1yYWNlci0zOC5jbGVyay5hY2NvdW50cy5kZXYk', // Замени на свой Frontend API key из панели Clerk
+        }).then(() => {
+            function updateAuthUI() {
+                const isSignedIn = Clerk. Clerk.session?.isSignedIn; // Проверка авторизации
+
+                document.getElementById('auth-container').style.display = isSignedIn ? 'none' : 'block'; // Скрыть формы авторизации, если залогинен
+                document.getElementById('protected-content').style.display = isSignedIn ? 'block' : 'none';  // Показать защищенный контент, если залогинен
+                document.getElementById('unprotected-content').style.display = isSignedIn ? 'none' : 'block'; // Скрыть незащищенный контент, если залогинен
+                document.querySelector('clerk-user-button').style.display = isSignedIn ? 'block' : 'none'; // Показать кнопку профиля
+
+                if (isSignedIn) {
+                    document.getElementById('user-name').textContent = Clerk. Clerk.user?.firstName || 'Пользователь'; // Отображение имени пользователя
+                }
+            }
+
+            Clerk. Clerk.addListener(() => { // Слушаем изменения статуса авторизации
+                updateAuthUI();
+            });
+        });
+
+            updateAuthUI(); // Обновляем UI при первой загрузке
+
+            // Пример запроса к защищенному роуту
+            document.getElementById('check-protected-route').addEventListener('click', async () => {
+                const token = await Clerk. Clerk.session?.getToken(); // Получаем JWT токен сессии
+                if (token) {
+                    try {
+                        const response = await fetch('http://localhost:5000/api/protected', {
+                            headers: {
+                                'Authorization': `Bearer ${token}`, // Отправляем токен в заголовке Authorization
+                            },
+                        });
+                        const data = await response.json();
+                        document.getElementById('protected-route-message').textContent = JSON.stringify(data);
+                    } catch (error) {
+                        console.error('Ошибка запроса к защищенному роуту:', error);
+                        document.getElementById('protected-route-message').textContent = 'Ошибка запроса к защищенному роуту.';
+                    }
+                } else {
+                    document.getElementById('protected-route-message').textContent = 'Не авторизован.';
+                }
+            });
+        });
+
+    </script>
+</body>
+</html>

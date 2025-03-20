@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Статистика</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --background-color: #1a1a1a;
+            --text-color: white;
+            --container-bg: #2a2a2a;
+            --stat-box-bg: #333;
+            --button-bg: #007bff;
+            --button-hover-bg: #0056b3;
+            --transition-speed: 0.3s;
+        }
+
+        [data-theme="light"] {
+            --background-color: #f4f4f4;
+            --text-color: #333;
+            --container-bg: white;
+            --stat-box-bg: #e0e0e0;
+            --button-bg: #28a745;
+            --button-hover-bg: #218838;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            transition: background-color var(--transition-speed) ease, color var(--transition-speed) ease;
+        }
+
+        .container {
+            background: var(--container-bg);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            width: 80%;
+            max-width: 400px;
+            transition: background-color var(--transition-speed) ease;
+        }
+
+        .stat-box {
+            background: var(--stat-box-bg);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-size: 18px;
+            transition: background-color var(--transition-speed) ease;
+        }
+
+        button {
+            background: var(--button-bg);
+            color: white;
+            border: none;
+            padding: 10px;
+            margin-top: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+            width: 100%;
+            transition: background-color var(--transition-speed) ease;
+        }
+
+        button:hover {
+            background: var(--button-hover-bg);
+        }
+
+        #theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .home-button {
+            display: inline-flex; /* Используем inline-flex для выравнивания иконки и текста */
+            align-items: center; /* Выравниваем элементы по вертикали */
+            justify-content: center; /* Выравниваем содержимое по горизонтали */
+            background: var(--button-bg);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin-bottom: 20px; /* Добавим отступ снизу, чтобы отделить от контейнера */
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+            text-decoration: none; /* Убираем подчеркивание ссылки */
+            transition: background-color var(--transition-speed) ease;
+        }
+
+        .home-button:hover {
+            background: var(--button-hover-bg);
+        }
+
+        .home-button i {
+            margin-right: 10px; /* Отступ между иконкой и текстом */
+        }
+    </style>
+</head>
+<body>
+    <a href="main.html" class="home-button">
+        <i class="fas fa-home"></i> На главную
+    </a>
+    <div class="container">
+        <h1>Статистика</h1>
+        <div class="stat-box" id="questionsAnswered">Отвечено вопросов: 0</div>
+        <div class="stat-box" id="correctAnswers">Правильных ответов: 0</div>
+        <div class="stat-box" id="quizPlayed">Пройдено викторин: 0</div>
+        <button onclick="fetchStats()">Обновить статистику</button>
+    </div>
+
+    <!-- Кнопка переключения темы -->
+    <button id="theme-toggle">
+        <i class="fas fa-moon"></i> <!-- Иконка луны по умолчанию -->
+    </button>
+
+    <script>
+        // Функция для переключения темы
+        function toggleTheme() {
+            const body = document.body;
+            const themeToggleIcon = document.querySelector("#theme-toggle i");
+            const currentTheme = body.getAttribute("data-theme");
+
+            if (currentTheme === "light") {
+                body.setAttribute("data-theme", "dark");
+                localStorage.setItem("theme", "dark");
+                themeToggleIcon.classList.remove("fa-sun");
+                themeToggleIcon.classList.add("fa-moon");
+            } else {
+                body.setAttribute("data-theme", "light");
+                localStorage.setItem("theme", "light");
+                themeToggleIcon.classList.remove("fa-moon");
+                themeToggleIcon.classList.add("fa-sun");
+            }
+        }
+
+        // Загрузка сохраненной темы при загрузке страницы
+        function loadTheme() {
+            const savedTheme = localStorage.getItem("theme");
+            const systemTheme = window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+            const theme = savedTheme || systemTheme;
+            document.body.setAttribute("data-theme", theme);
+
+            // Устанавливаем иконку в зависимости от темы
+            const themeToggleIcon = document.querySelector("#theme-toggle i");
+            if (theme === "light") {
+                themeToggleIcon.classList.remove("fa-moon");
+                themeToggleIcon.classList.add("fa-sun");
+            } else {
+                themeToggleIcon.classList.remove("fa-sun");
+                themeToggleIcon.classList.add("fa-moon");
+            }
+        }
+
+        // Назначаем обработчик события для кнопки переключения темы
+        document.getElementById("theme-toggle").addEventListener("click", toggleTheme);
+
+        // Загружаем тему при загрузке страницы
+        window.addEventListener("load", loadTheme);
+
+        // Функция для загрузки статистики
+        function fetchStats() {
+            fetch("https://your-backend.com/api/user-stats") // Заменить на реальный API
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("questionsAnswered").textContent = `Отвечено вопросов: ${data.questionsAnswered}`;
+                    document.getElementById("correctAnswers").textContent = `Правильных ответов: ${data.correctAnswers}`;
+                    document.getElementById("quizPlayed").textContent = `Пройдено викторин: ${data.quizPlayed}`;
+                })
+                .catch(() => {
+                    alert("Ошибка загрузки статистики");
+                });
+        }
+
+        // Загружаем статистику при загрузке страницы
+        fetchStats();
+    </script>
+</body>
+</html>

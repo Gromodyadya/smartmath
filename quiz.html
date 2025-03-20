@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Математическая Викторина</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --background-color: #1a1a1a;
+            --text-color: white;
+            --container-bg: #2a2a2a;
+            --question-box-bg: #333;
+            --button-bg: #007bff;
+            --button-hover-bg: #0056b3;
+            --timer-color: white;
+            --transition-speed: 0.3s;
+        }
+
+        [data-theme="light"] {
+            --background-color: #f4f4f4;
+            --text-color: #333;
+            --container-bg: white;
+            --question-box-bg: #e0e0e0;
+            --button-bg: #28a745;
+            --button-hover-bg: #218838;
+            --timer-color: #333;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            transition: background-color var(--transition-speed) ease, color var(--transition-speed) ease;
+        }
+
+        .container {
+            background: var(--container-bg);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            width: 80%;
+            max-width: 400px;
+            transition: background-color var(--transition-speed) ease;
+        }
+
+        .question-box {
+            background: var(--question-box-bg);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 18px;
+            transition: background-color var(--transition-speed) ease;
+        }
+
+        .answer-btn {
+            background: var(--button-bg);
+            color: white;
+            border: none;
+            padding: 10px;
+            margin: 5px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+            width: 100%;
+            transition: background-color var(--transition-speed) ease;
+        }
+
+        .answer-btn:hover {
+            background: var(--button-hover-bg);
+        }
+
+        .answer-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .timer {
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: var(--timer-color);
+            transition: color var(--transition-speed) ease;
+        }
+
+        button {
+            background: var(--button-bg);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: background-color var(--transition-speed) ease;
+        }
+
+        button:hover {
+            background: var(--button-hover-bg);
+        }
+
+        #theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .home-button {
+            display: inline-flex; /* Используем inline-flex для выравнивания иконки и текста */
+            align-items: center; /* Выравниваем элементы по вертикали */
+            justify-content: center; /* Выравниваем содержимое по горизонтали */
+            background: var(--button-bg);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin-bottom: 20px; /* Добавим отступ снизу, чтобы отделить от контейнера */
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+            text-decoration: none; /* Убираем подчеркивание ссылки */
+            transition: background-color var(--transition-speed) ease;
+        }
+
+        .home-button:hover {
+            background: var(--button-hover-bg);
+        }
+
+        .home-button i {
+            margin-right: 10px; /* Отступ между иконкой и текстом */
+        }
+    </style>
+</head>
+<body>
+    <a href="main.html" class="home-button">
+        <i class="fas fa-home"></i> На главную
+    </a>
+    <div class="container">
+        <h1>Математическая Викторина</h1>
+        <div class="timer" id="timer" style="display: none;">Время: 30</div> <!-- Скрыто по умолчанию -->
+        <div class="question-box" id="question" ></div> <!-- Пустой по умолчанию -->
+        <div id="answers"></div> <!-- Пустой по умолчанию -->
+        <div id="quiz-progress" style="display: none;">Вопрос 0 из 10</div> <!-- Скрыто по умолчанию -->
+        <div id="score" style="display: none;">Счет: 0</div> <!-- Скрыто по умолчанию -->
+        <button id="start-quiz-button">Начать викторину</button>
+    </div>
+
+    <!-- Кнопка переключения темы -->
+    <button id="theme-toggle">
+        <i class="fas fa-moon"></i>
+    </button>
+
+    <script>
+        // Логика викторины
+        let timeLeft = 30;
+        let timerInterval;
+        let questionNumber = 0; // Текущий номер вопроса
+        let score = 0; // Счет пользователя
+        const totalQuestions = 10; // Общее количество вопросов
+
+        // Функция для запуска таймера
+        function startTimer() {
+            timeLeft = 20;
+            document.getElementById("timer").textContent = `Время: ${timeLeft}`;
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                document.getElementById("timer").textContent = `Время: ${timeLeft}`;
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    handleTimeout(); // Обработка истечения времени
+                }
+            }, 1000);
+        }
+
+        // Обработка истечения времени
+        function handleTimeout() {
+            const correctButton = document.querySelector(".answer-btn.correct");
+            if (correctButton) {
+                correctButton.style.backgroundColor = "green"; // Мигаем зеленым
+                setTimeout(() => {
+                    correctButton.style.backgroundColor = ""; // Возвращаем стандартный цвет
+                    setTimeout(() => fetchQuestion(), 500); // Через 0.5 секунды следующий вопрос
+                }, 1000); // Зеленый цвет на 1 секунду
+            }
+        }
+
+        // Функция для загрузки вопроса
+        function fetchQuestion() {
+            if (questionNumber >= totalQuestions) {
+                endQuiz();
+                return;
+            }
+
+            clearInterval(timerInterval);
+            startTimer();
+
+            questionNumber++;
+            document.getElementById("quiz-progress").textContent = `Вопрос ${questionNumber} из ${totalQuestions}`;
+            document.getElementById("question").textContent = "Загрузка вопроса...";
+            document.getElementById("answers").innerHTML = "";
+
+            fetch("http://localhost:5000/api/questions/random") // Используем ваш API endpoint
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        document.getElementById("question").textContent = "Ошибка загрузки вопроса: " + data.error;
+                        document.getElementById("answers").innerHTML = "";
+                        return;
+                    }
+                    document.getElementById("question").textContent = data.question;
+                    let answersContainer = document.getElementById("answers");
+                    answersContainer.innerHTML = "";
+                    data.answers.forEach((answer, index) => {
+                        let button = document.createElement("button");
+                        button.textContent = answer;
+                        button.className = "answer-btn";
+                        if (answer === data.correctAnswer) {
+                            button.classList.add("correct"); // Добавляем класс для правильного ответа
+                        }
+                        button.onclick = () => checkAnswer(answer, data.correctAnswer);
+                        answersContainer.appendChild(button);
+                    });
+                })
+                .catch(() => document.getElementById("question").textContent = "Ошибка сети при загрузке вопроса");
+        }
+
+        // Функция для проверки ответа
+        function checkAnswer(selectedAnswer, correctAnswer) {
+            clearInterval(timerInterval);
+            const buttons = document.querySelectorAll(".answer-btn");
+
+            buttons.forEach(button => {
+                button.disabled = true; // Отключаем все кнопки
+                if (button.textContent === correctAnswer) {
+                    button.style.backgroundColor = "green"; // Зеленый для правильного ответа
+                } else if (button.textContent === selectedAnswer) {
+                    button.style.backgroundColor = "red"; // Красный для неправильного ответа
+                }
+            });
+
+            if (selectedAnswer === correctAnswer) {
+                score++;
+            }
+
+            document.getElementById("score").textContent = `Счет: ${score}`;
+
+            setTimeout(() => {
+                if (questionNumber < totalQuestions) {
+                    fetchQuestion(); // Переход к следующему вопросу через 1.5 секунды
+                } else {
+                    endQuiz(); // Завершение викторины
+                }
+            }, 1500); // 1.5 секунды на просмотр ответа
+        }
+
+        // Функция для завершения викторины
+        function endQuiz() {
+            document.getElementById("timer").textContent = "Викторина завершена";
+            document.getElementById("question").textContent = `Викторина завершена! Ваш итоговый счет: ${score} из ${totalQuestions}`;
+            document.getElementById("answers").innerHTML = "";
+            document.getElementById("quiz-progress").textContent = `Викторина завершена`;
+        }
+
+        // Обработчик для кнопки "Начать викторину"
+        document.getElementById("start-quiz-button").addEventListener("click", () => {
+            questionNumber = 0;
+            score = 0;
+
+            // Показываем скрытые элементы
+            document.getElementById("timer").style.display = "block";
+            document.getElementById("quiz-progress").style.display = "block";
+            document.getElementById("score").style.display = "block";
+
+            // Обновляем счет и скрываем кнопку
+            document.getElementById("score").textContent = `Счет: ${score}`;
+            document.getElementById("start-quiz-button").style.display = "none";
+
+            fetchQuestion(); // Начинаем викторину
+        });
+
+        // Логика переключения темы
+        function toggleTheme() {
+            const body = document.body;
+            const themeToggleIcon = document.querySelector("#theme-toggle i");
+            const currentTheme = body.getAttribute("data-theme");
+
+            if (currentTheme === "light") {
+                body.setAttribute("data-theme", "dark");
+                localStorage.setItem("theme", "dark");
+                themeToggleIcon.classList.remove("fa-sun");
+                themeToggleIcon.classList.add("fa-moon");
+            } else {
+                body.setAttribute("data-theme", "light");
+                localStorage.setItem("theme", "light");
+                themeToggleIcon.classList.remove("fa-moon");
+                themeToggleIcon.classList.add("fa-sun");
+            }
+        }
+
+        // Загрузка сохраненной темы при загрузке страницы
+        function loadTheme() {
+            const savedTheme = localStorage.getItem("theme");
+            const systemTheme = window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+            const theme = savedTheme || systemTheme;
+            document.body.setAttribute("data-theme", theme);
+
+            const themeToggleIcon = document.querySelector("#theme-toggle i");
+            if (theme === "light") {
+                themeToggleIcon.classList.remove("fa-moon");
+                themeToggleIcon.classList.add("fa-sun");
+            } else {
+                themeToggleIcon.classList.remove("fa-sun");
+                themeToggleIcon.classList.add("fa-moon");
+            }
+        }
+
+        document.getElementById("theme-toggle").addEventListener("click", toggleTheme);
+        window.addEventListener("load", loadTheme);
+    </script>
+</body>
+</html>
